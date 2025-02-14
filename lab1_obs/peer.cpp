@@ -300,3 +300,53 @@ std::vector<NodeInfo> Peer::parsePeerList(const std::string& peerListStr) {
     
     return peers;
 }
+void Peer::handleIncomingConnections() {
+    while (running) {
+        sockaddr_in clientAddr{};
+        socklen_t clientLen = sizeof(clientAddr);
+        int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientLen);
+        
+        if (clientSocket >= 0) {
+            std::string clientIP = inet_ntoa(clientAddr.sin_addr);
+            int clientPort = ntohs(clientAddr.sin_port);
+            
+            ConnectedPeer newPeer{clientIP, clientPort, clientSocket, 0};
+            
+            {
+                std::lock_guard<std::mutex> lock(peersMutex);
+                connectedPeers.push_back(newPeer);
+            }
+            
+            threads.emplace_back([this, newPeer]() {
+                handlePeerMessages(newPeer);
+            });
+        }
+    }
+}
+
+void Peer::broadcastMessage(const std::string& msg) {
+    std::lock_guard<std::mutex> lock(peersMutex);
+    size_t msgHash = Message::hash(msg);
+    
+    for (const auto& peer : connectedPeers) {
+        send(peer.socket, msg.c_str(), msg.length(), 0);
+    }
+    
+    messageList[msgHash].insert(ip + ":" + std::to_string(port));
+}
+
+void Peer::handleMessage(const std::string& msg, const std::string& senderIP) {
+    size_t msgHash = Message::hash(msg);
+    
+    {
+        std::lock_guard<std::mutex> lock(peersMutex);
+        if (messageList[msgHash].find(senderIP) != messageList[msgHash].end()) {
+            return; // Already received this message
+        }
+        
+        messageList[msgHash].insert(senderIP);
+    }
+    
+    logMessage("Received: " + msg + " from " + senderIP);
+    broadcastMessage(msg); // Forward to other peers
+}
