@@ -172,15 +172,40 @@ Consider a network with the following components:
   - Functions such as `increase_peer_degree()`, `update_peer()`, and `peer_dict_to_string()` manage and communicate peer status.
   - `handle_dead_node()` processes notifications about dead peers and updates the network view.
 
-## Running the Project
+# Running the Project
 
-1. **For Seed Nodes:**
-   - Run [`seed.py`](seed.py) and enter one of the port number as per config file when prompted.
-   - The seed node will start listening and handling peer connections.
+## Running Locally
+- Open multiple terminal windows or tabs on your local machine.
+- In one terminal, navigate to the project directory and run:
+    ```bash
+    python3 seed.py
+    ```
+    When prompted, enter one of the port numbers as per [config.txt](http://_vscodecontentref_/0). This starts the seed node.
+- In additional terminals, run:
+    ```bash
+    python3 peer.py
+    ```
+    When prompted, enter a unique listening port (different from the ones used by seeds). This starts a peer node.
+- Monitor terminal outputs and log files for peer connections, degree updates, and gossip message propagation.
 
-2. **For Peers:**
-   - Run [`peer.py`](peer.py) and input a listening port(don't put the ports used by seeds) when prompted.
-   - The peer loads seed information from [`config.txt`](config.txt), registers with a subset of seeds ensuring power-law, and starts the rounds of liveness checks and gossip broadcasts.
+## Running on Different Machines
+- **Seed Node Setup:**
+  - Choose one machine to run [seed.py](http://_vscodecontentref_/1). Ensure its IP address is accessible over the network.
+  - Update [config.txt](http://_vscodecontentref_/2) with the seed’s IP and its chosen ports. For example:
+    ```plaintext
+    192.168.15.10:1200
+    192.168.15.10:1202
+    192.168.15.10:1204
+    ```
+  - On the seed machine, navigate to the project directory and run:
+    ```bash
+    python3 seed.py
+    ```
+- **Peer Nodes Setup:**
+  - On each of the other machines, run [peer.py](http://_vscodecontentref_/3).
+  - When prompted, enter a listening port (use ports not used by the seed node).
+  - Ensure peers either access the updated [config.txt](http://_vscodecontentref_/4) or have it locally with the correct seed addresses.
+- Monitor logs for successful peer registration, liveness checks, and gossip protocol messages across the network.
 
 This design ensures that messages are efficiently disseminated throughout the network while continuously monitoring peer availability. The Gossip protocol, combined with seed node bootstrapping and power-law degree distribution, provides a solid framework for creating scalable and resilient P2P networks.
 
