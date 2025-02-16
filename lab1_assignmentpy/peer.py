@@ -6,7 +6,7 @@ import random
 import logging
 from queue import Queue
 
-# Configure structured logging
+# Configuring structured logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -14,7 +14,7 @@ logging.basicConfig(
 )
 
 # Global configuration and state
-THREAD_COUNT = 3  # three threads: listener, liveness, gossip
+THREAD_COUNT = 3  # three threads: one for listening, liveness, gossip check respectively
 JOB_IDS = [1, 2, 3]
 job_queue = Queue()
 
@@ -76,7 +76,7 @@ def load_seed_config():
 
 
 def count_seeds():
-    """Populate seed_addresses set and return count."""
+    #Populate seed_addresses set and return count
     global seeds_address_list
     for line in seeds_address_list.splitlines():
         if line:
@@ -110,7 +110,12 @@ def bind_socket(s):
         bind_socket(s)
 
 
+# This part of the code is crucial in maintaining a power-law distribution in the designed peer network.
+# In power-law distributed networks, a few nodes (seeds) have a high number of connections,
+# while many nodes have fewer connections. This helps in efficient information spread and robustness.
 def update_seed_degree():
+    # this functn is responsible for letting the seed nodes know that this peer
+    # has increased itz degree, so they can update thier records
     my_addr = f"{MY_IP}:{PORT}"
     for seed in connected_seeds:
         try:
@@ -127,6 +132,8 @@ def update_seed_degree():
 
 
 def process_peer_connection(conn, addr):
+    # this functn process incoming connections from other peers, handling
+    # new connection requests, liveness checks and gossip messages
     while True:
         try:
             raw_msg = conn.recv(1024).decode("utf-8")
@@ -135,7 +142,7 @@ def process_peer_connection(conn, addr):
             logging.info("Received: %s", raw_msg)
             parts = raw_msg.split(":")
             if parts[0].startswith("New Connect Request From"):
-                if len(active_peers) < 4:
+                if len(active_peers) < 4:  # limit peers to 4 to control network degree
                     conn.send("New Connect Accepted".encode("utf-8"))
                     new_peer = Peer(f"{addr[0]}:{parts[2]}")
                     active_peers.append(new_peer)
@@ -151,6 +158,8 @@ def process_peer_connection(conn, addr):
 
 
 def start_listener(s):
+    # this is the main entry for handling incoming connections.
+    # It start a new thread for each new connection from peers.
     s.listen(5)
     logging.info("Peer started listening on %s:%s", MY_IP, PORT)
     while True:
@@ -160,6 +169,7 @@ def start_listener(s):
 
 
 def connect_to_peers(peer_list):
+    # Tries to connect to peers in the provided list and maintain active peer limit
     if not peer_list:
         logging.info("No peers available to connect")
         return
@@ -183,6 +193,7 @@ def connect_to_peers(peer_list):
 
 
 def join_top_peers(peer_entries):
+    # selects top-degree peers and try to connect to maintain power-law distribition
     if not peer_entries:
         return
     total = len(peer_entries)
@@ -196,6 +207,7 @@ def join_top_peers(peer_entries):
 
 
 def merge_peer_lists(raw_list):
+    # takes a raw string of peers and their degrees, process them and updates the peer list
     global all_peer_entries, MY_IP
     all_peer_entries.clear()
     entries = raw_list.split(";")
@@ -209,7 +221,7 @@ def merge_peer_lists(raw_list):
                 except Exception:
                     degree = 0
                 all_peer_entries.add((addr, degree))
-    # Update MY_IP if possible
+    # update MY_IP based on last entry
     if entries:
         last = entries[-1].split(":")
         if last:
@@ -220,6 +232,7 @@ def merge_peer_lists(raw_list):
 
 
 def refresh_degree_at_seeds(updated_degree):
+    # sends an updated degree information to the seed nodes so they can adjust their data
     my_addr = f"{MY_IP}:{PORT}"
     for seed in connected_seeds:
         try:
@@ -234,8 +247,8 @@ def refresh_degree_at_seeds(updated_degree):
         except Exception:
             logging.error("Failed degree update for seed %s", seed)
 
-
 def connect_seeds():
+    # This  connects to seed nodes and retrieves peer lists.
     peer_lists = []
     for i, seed in enumerate(connected_seeds):
         try:
@@ -261,6 +274,7 @@ def connect_seeds():
 
 
 def register_with_seeds():
+    # This  randomly selects half of the seeds and connects to them.
     global seed_addresses, connected_seeds
     seed_list = list(seed_addresses)
     k = len(seed_list) // 2 + 1
@@ -271,6 +285,7 @@ def register_with_seeds():
 
 
 def announce_dead(peer_addr):
+    # This  informs seed nodes that a peer is dead.
     msg = f"Dead Node:{peer_addr}:{current_time()}:{MY_IP}"
     logging.info("Reporting dead node: %s", msg)
     log_to_file(msg)
@@ -286,6 +301,7 @@ def announce_dead(peer_addr):
 
 
 def monitor_liveness():
+    # This  checks if peers are alive and removes unresponsive ones.
     while True:
         liveness_cmd = f"Liveness Request:{current_time()}:{MY_IP}:{PORT}"
         logging.info("Sending liveness request: %s", liveness_cmd)
@@ -308,6 +324,7 @@ def monitor_liveness():
 
 
 def relay_gossip(message):
+    # This  spreads received gossip messages to connected peers.
     msg_hash = compute_hash(message)
     if msg_hash in gossip_hashes:
         return
@@ -326,6 +343,7 @@ def relay_gossip(message):
 
 
 def broadcast_gossip():
+    # This  sends gossip messages periodically.
     for i in range(10):
         gossip_msg = f"{current_time()}:{MY_IP}:{PORT}:GOSSIP{i+1}"
         gossip_hashes.append(compute_hash(gossip_msg))
@@ -342,6 +360,7 @@ def broadcast_gossip():
 
 
 def create_worker_threads():
+    # This  creates worker threads for handling jobs.
     for _ in range(THREAD_COUNT):
         thread = threading.Thread(target=job_executor)
         thread.daemon = True
@@ -349,6 +368,7 @@ def create_worker_threads():
 
 
 def job_executor():
+    # This  executes jobs from the job queue.
     while True:
         job_type = job_queue.get()
         if job_type == 1:
@@ -363,12 +383,14 @@ def job_executor():
 
 
 def enqueue_jobs():
+    # This puts jobs in the queue and processes them.
     for j in JOB_IDS:
         job_queue.put(j)
     job_queue.join()
 
 
 if __name__ == "__main__":
+    # Main execution starts here. It initializes seeds, workers, and jobs.
     load_seed_config()
     total_seeds = count_seeds()
     logging.info("Total Seeds available: %d", total_seeds)

@@ -2,7 +2,7 @@ import socket as sk
 import threading
 import logging
 
-# Configure logging for structured terminal output
+# Configuring logging for structured terminal output
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -32,7 +32,7 @@ def create_server_socket():
         raise
 
 def bind_server_socket(server_socket):
-    """Bind the server socket on the defined IP and Port."""
+    #used to bind the server socket on the defined IP and Port."""
     try:
         server_socket.bind((LISTEN_IP, LISTEN_PORT))
         logging.info("Socket bound to %s:%d", LISTEN_IP, LISTEN_PORT)
@@ -45,7 +45,7 @@ def peers_to_string(peers):
     return ",".join(peers.keys())
 
 def handle_dead_node(msg):
-    """Process dead node message and update the connected_peers dict."""
+    #helps in Processing dead node message and updating the connected_peers dict."""
     parts = msg.split(":")
     if len(parts) < 3:
         logging.error("Invalid dead node message: %s", msg)
@@ -86,7 +86,7 @@ def increase_peer_degree(peer_key):
         return "Peer not found"
 
 def process_peer_connection(conn, addr):
-    """Handle communication with a peer connection."""
+    #Handles all communication with a peer connection
     while True:
         try:
             data = conn.recv(1024).decode('utf-8')
@@ -136,7 +136,7 @@ def process_peer_connection(conn, addr):
     conn.close()
 
 def start_server():
-    """Begin listening for peer connections and spawn a new thread for each connection."""
+    #this helps begin listening for peer connections and spawn a new thread for each connection.
     server_socket = create_server_socket()
     bind_server_socket(server_socket)
     server_socket.listen(5)
