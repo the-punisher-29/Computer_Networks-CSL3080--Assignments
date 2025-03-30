@@ -171,4 +171,4 @@ client1 <-> client2
 
 This project demonstrates how **distributed computing** can be improved using **redundancy, fault tolerance, and reputation-based task allocation**. By dynamically selecting **high-performing servers** and filtering out **malicious ones**, we enhance the **accuracy and reliability** of remote task execution.  
 
-For further insights, check the **output logs in `output.txt`**. 🚀
+For further insights, check the **output logs in `output.txt`**.
