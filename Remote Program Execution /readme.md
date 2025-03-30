@@ -89,7 +89,7 @@ Execute the program with:
 
 ### **Step 4: View the Output**  
 - The **console** displays the computed maxima for each subtask.  
-- Detailed logs are stored in **`output.rtxt`**.  
+- Detailed logs are stored in **`output.txt`**.  
 - This file contains:
   - **Subtask results from each server**  
   - **Final computed result for each client**  
@@ -98,7 +98,7 @@ Execute the program with:
 
 ---
 
-## **Understanding the Output (`output.rtxt`)**  
+## **Understanding the Output (`output.txt`)**  
 
 ### **Sample Output**  
 ```
@@ -171,4 +171,4 @@ client1 <-> client2
 
 This project demonstrates how **distributed computing** can be improved using **redundancy, fault tolerance, and reputation-based task allocation**. By dynamically selecting **high-performing servers** and filtering out **malicious ones**, we enhance the **accuracy and reliability** of remote task execution.  
 
-For further insights, check the **output logs in `output.rtxt`**. 🚀
+For further insights, check the **output logs in `output.txt`**. 🚀
