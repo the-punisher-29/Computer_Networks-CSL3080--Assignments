@@ -9,7 +9,7 @@ This project implements a Gossip protocol over a peer-to-peer (P2P) network, foc
 - **Redundancy:** Multiple seed nodes are used for redundancy and reliability.
 - **Configuration:** Their details are stored in the `config.txt` file.
 - **Functionality in Code:**  
-  - In [`seed.py`](seed.py), seed nodes create a server socket, listen for incoming connections from peers, and maintain a record of connected peers and their degree using functions like `create_server_socket()`, `bind_server_socket()`, and `process_peer_connection()`.
+  - In [`Gossip_Protocol-P2P/lab1_assignmentpy/seed.py`](seed.py), seed nodes create a server socket, listen for incoming connections from peers, and maintain a record of connected peers and their degree using functions like `create_server_socket()`, `bind_server_socket()`, and `process_peer_connection()`.
   - Functions such as `increase_peer_degree()`, `update_peer()`, and `handle_dead_node()` help manage and update peer states.
 
 ### Peers
@@ -17,7 +17,7 @@ This project implements a Gossip protocol over a peer-to-peer (P2P) network, foc
 - **Connection Strategy:** Each peer connects to a subset of other peers to form a connected network graph.
 - **Degree Management:** Connections follow a power-law distribution where most peers have only a few connections, while a few have many.
 - **Functionality in Code:**  
-  - In [`peer.py`](peer.py), each peer:
+  - In [`Gossip_Protocol-P2P/lab1_assignmentpy/peer.py`](peer.py), each peer:
     - Loads seed information using `load_seed_config()` and computes the count via `count_seeds()`.
     - Randomly selects a subset of seed nodes to register with via `register_with_seeds()`.
     - Establishes connections to other peers using functions like `connect_to_peers()`, `join_top_peers()`, and `merge_peer_lists()`.
@@ -27,7 +27,7 @@ This project implements a Gossip protocol over a peer-to-peer (P2P) network, foc
 - **Regular Pings:** Peers send periodic "ping" (liveness) messages to their connected neighbors.
 - **Timeout and Reporting:** If a peer fails to respond within a defined period, it is marked as dead and reported to seed nodes using the `announce_dead()` function.
 - **Code Implementation:**  
-  - The `monitor_liveness()` function in [`peer.py`](peer.py) iterates over active peers, sends liveness requests, and removes those that do not respond after multiple failures.
+  - The `monitor_liveness()` function in [`Gossip_Protocol-P2P/lab1_assignmentpy/peer.py`](peer.py) iterates over active peers, sends liveness requests, and removes those that do not respond after multiple failures.
 
 ### Power-law Degree Distribution
 - **Goal:** Ensure that the number of connections (degree) each peer has follows a power-law distribution.
@@ -67,7 +67,7 @@ Consider a network with the following components:
 ## Network Formation
 
 1. **Seed Nodes Configuration:**  
-   Details of seed nodes are listed in [`config.txt`](config.txt). Each peer must connect to at least ⌊n/2⌋+1 seed nodes, where _n_ is the total number of seeds.
+   Details of seed nodes are listed in [`Gossip_Protocol-P2P/lab1_assignmentpy/config.txt`](config.txt). Each peer must connect to at least ⌊n/2⌋+1 seed nodes, where _n_ is the total number of seeds.
 
 2. **Bootstrapping Process:**  
    - A new peer first connects to the configured seed nodes.
@@ -138,9 +138,9 @@ Consider a network with the following components:
 
 ## Summary of Implemented Functionalities
 
-### In [`peer.py`](peer.py)
+### In [`Gossip_Protocol-P2P/lab1_assignmentpy/peer.py`](peer.py)
 - **Seed Configuration & Connection:**  
-  - `load_seed_config()` reads seed node details from [`config.txt`](config.txt).  
+  - `load_seed_config()` reads seed node details from [`Gossip_Protocol-P2P/lab1_assignmentpy/config.txt`](config.txt).  
   - `count_seeds()` computes the number of unique seed nodes.
   - `register_with_seeds()` selects and connects to a subset of seed nodes.
   
@@ -161,7 +161,7 @@ Consider a network with the following components:
   - Worker threads are managed using `create_worker_threads()`, and jobs are queued with `enqueue_jobs()`.  
   - Each worker executes a task based on its job type in `job_executor()`.
 
-### In [`seed.py`](seed.py)
+### In [`Gossip_Protocol-P2P/lab1_assignmentpy/seed.py`](seed.py)
 - **Server Setup:**  
   - `create_server_socket()` and `bind_server_socket()` create and bind the socket.
   - `start_server()` listens for incoming connections from peers.
